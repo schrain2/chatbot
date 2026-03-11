@@ -1,0 +1,17 @@
+{
+  "version": "2.0",
+  "template": {
+    "outputs": [
+      {
+        "simpleText": {
+          "text": "안녕하세요! 🐱\n슈레인 고양이 사료 공식 채널입니다.\n\n아래 메뉴에서 원하시는 항목을 선택해 주세요 😊"
+        }
+      }
+    ],
+    "quickReplies": [
+      { "label": "🛍 상품 목록", "action": "message", "messageText": "상품 목록" },
+      { "label": "🛒 구매하기", "action": "message", "messageText": "구매하기" },
+      { "label": "❓ 자주 묻는 질문", "action": "message", "messageText": "자주 묻는 질문" }
+    ]
+  }
+}
