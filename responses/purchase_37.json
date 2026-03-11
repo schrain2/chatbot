@@ -1,0 +1,28 @@
+{
+  "version": "2.0",
+  "template": {
+    "outputs": [
+      {
+        "basicCard": {
+          "title": "🛒 구매 신청 - 인도어 소고기+체중관리",
+          "description": "아래 양식을 복사해서 내용을 채워 전송해 주세요 😊\n\n─────────────────\n📋 구매 신청서\n\n구매 품목 : 인도어 소고기+체중관리 2.5kg\n구매 수량 : \n주소지 : \n연락처 : \n성함 : \n배송 메모 : \n─────────────────\n\n전송 후 확인하여 결제 안내 드리겠습니다! 💳",
+          "thumbnail": {
+            "imageUrl": "https://ecimg.cafe24img.com/pg2547b04207977059/cndjrms30/web/product/big/20260129/fde42501677263b549c05d016fd3c5ac.jpg",
+            "fixedRatio": true
+          },
+          "buttons": [
+            {
+              "label": "상품 페이지 보기",
+              "action": "webLink",
+              "webLinkUrl": "https://xn--om2b15qn1d.com/product/detail.html?product_no=37&cate_no=1&display_group=2"
+            }
+          ]
+        }
+      }
+    ],
+    "quickReplies": [
+      { "label": "🐱 다른 상품 보기", "action": "message", "messageText": "상품 목록" },
+      { "label": "❓ 자주 묻는 질문", "action": "message", "messageText": "자주 묻는 질문" }
+    ]
+  }
+}

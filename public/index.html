@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>슈링커 카카오 챗봇 스킬 서버</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
+      background: #f0f0f0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 40px 20px;
+    }
+
+    h1 {
+      font-size: 1.4rem;
+      color: #333;
+      margin-bottom: 6px;
+      text-align: center;
+    }
+
+    .subtitle {
+      font-size: 0.9rem;
+      color: #888;
+      margin-bottom: 30px;
+      text-align: center;
+    }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #e8f5e9;
+      color: #2e7d32;
+      border-radius: 20px;
+      padding: 6px 14px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-bottom: 30px;
+    }
+
+    .dot {
+      width: 8px; height: 8px;
+      background: #4caf50;
+      border-radius: 50%;
+      animation: blink 1.5s infinite;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+
+    /* 카카오톡 채팅창 */
+    .chat-wrapper {
+      width: 100%;
+      max-width: 400px;
+      background: #b2c7d9;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+    }
+
+    .chat-header {
+      background: #3c3c3c;
+      color: #fff;
+      padding: 14px 18px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .chat-header .avatar {
+      width: 36px; height: 36px;
+      background: #fee500;
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.2rem;
+    }
+
+    .chat-header .name { font-size: 0.95rem; font-weight: 600; }
+    .chat-header .count { font-size: 0.75rem; color: #aaa; }
+
+    .chat-body {
+      padding: 16px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      min-height: 400px;
+      max-height: 600px;
+      overflow-y: auto;
+    }
+
+    /* 봇 메시지 */
+    .bot-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+    }
+
+    .bot-avatar {
+      width: 32px; height: 32px;
+      background: #fee500;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1rem;
+      flex-shrink: 0;
+    }
+
+    .bubble {
+      background: #fff;
+      border-radius: 0 12px 12px 12px;
+      padding: 10px 14px;
+      font-size: 0.88rem;
+      line-height: 1.6;
+      max-width: 280px;
+      white-space: pre-line;
+      color: #222;
+    }
+
+    /* 상품 카드 */
+    .product-card {
+      background: #fff;
+      border-radius: 12px;
+      overflow: hidden;
+      width: 220px;
+      flex-shrink: 0;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+
+    .product-card img {
+      width: 100%;
+      height: 160px;
+      object-fit: cover;
+    }
+
+    .product-card .card-body {
+      padding: 10px 12px;
+    }
+
+    .product-card .card-name {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 4px;
+      line-height: 1.4;
+    }
+
+    .product-card .card-price {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #222;
+      margin-bottom: 8px;
+    }
+
+    .card-price span {
+      font-size: 0.75rem;
+      font-weight: 400;
+      color: #888;
+    }
+
+    .card-buttons {
+      display: flex;
+      border-top: 1px solid #f0f0f0;
+    }
+
+    .card-btn {
+      flex: 1;
+      padding: 10px 4px;
+      text-align: center;
+      font-size: 0.8rem;
+      color: #3c8af7;
+      cursor: pointer;
+      font-weight: 500;
+      border: none;
+      background: none;
+    }
+
+    .card-btn:not(:last-child) {
+      border-right: 1px solid #f0f0f0;
+    }
+
+    .card-btn:hover { background: #f8f9ff; }
+
+    .carousel-wrap {
+      display: flex;
+      gap: 10px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+      margin-left: 40px;
+    }
+
+    /* 구매 폼 카드 */
+    .form-card {
+      background: #fff;
+      border-radius: 12px;
+      overflow: hidden;
+      max-width: 280px;
+      margin-left: 40px;
+    }
+
+    .form-card img {
+      width: 100%;
+      height: 140px;
+      object-fit: cover;
+    }
+
+    .form-card .form-body {
+      padding: 12px;
+    }
+
+    .form-card .form-title {
+      font-size: 0.9rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+      color: #222;
+    }
+
+    .form-card .form-text {
+      font-size: 0.78rem;
+      color: #555;
+      line-height: 1.7;
+      white-space: pre-line;
+    }
+
+    .form-btn {
+      display: block;
+      text-align: center;
+      padding: 10px;
+      border-top: 1px solid #eee;
+      font-size: 0.82rem;
+      color: #3c8af7;
+      font-weight: 500;
+      background: none;
+      border-left: none;
+      border-right: none;
+      border-bottom: none;
+      width: 100%;
+      cursor: pointer;
+    }
+
+    /* 사용자 메시지 */
+    .user-row {
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    .user-bubble {
+      background: #fee500;
+      border-radius: 12px 0 12px 12px;
+      padding: 10px 14px;
+      font-size: 0.88rem;
+      line-height: 1.6;
+      max-width: 240px;
+      color: #222;
+    }
+
+    /* 퀵리플라이 */
+    .quick-replies {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      padding: 4px 0 0 40px;
+    }
+
+    .qr-btn {
+      background: #fff;
+      border: 1.5px solid #ddd;
+      border-radius: 20px;
+      padding: 6px 14px;
+      font-size: 0.8rem;
+      color: #444;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .qr-btn:hover, .qr-btn.active {
+      background: #fee500;
+      border-color: #fee500;
+      color: #222;
+      font-weight: 600;
+    }
+
+    /* 하단 탭 메뉴 */
+    .tab-menu {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      background: #3c1f1f;
+      border-top: 1px solid #444;
+    }
+
+    .tab-item {
+      padding: 12px 6px;
+      text-align: center;
+      font-size: 0.75rem;
+      color: #fff;
+      cursor: pointer;
+      border: none;
+      background: none;
+      line-height: 1.4;
+    }
+
+    .tab-item:hover { background: rgba(255,255,255,0.1); }
+    .tab-item:not(:last-child) { border-right: 1px solid #555; }
+    .tab-item:nth-child(n+4) { border-top: 1px solid #555; }
+
+    /* API 엔드포인트 */
+    .endpoints {
+      width: 100%;
+      max-width: 400px;
+      margin-top: 24px;
+    }
+
+    .endpoints h2 {
+      font-size: 0.95rem;
+      color: #555;
+      margin-bottom: 10px;
+      font-weight: 600;
+    }
+
+    .endpoint-item {
+      background: #fff;
+      border-radius: 10px;
+      padding: 10px 14px;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.82rem;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    }
+
+    .method {
+      background: #3c8af7;
+      color: #fff;
+      border-radius: 4px;
+      padding: 2px 8px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    .ep-path { color: #333; font-weight: 600; }
+    .ep-desc { color: #888; margin-left: auto; font-size: 0.78rem; }
+  </style>
+</head>
+<body>
+
+  <h1>🐱 슈링커 카카오 챗봇</h1>
+  <p class="subtitle">슈레인 고양이 사료 카카오 채널 스킬 서버</p>
+  <div class="status-badge"><div class="dot"></div> 서버 정상 운영 중</div>
+
+  <!-- 카카오톡 미리보기 -->
+  <div class="chat-wrapper">
+    <div class="chat-header">
+      <div class="avatar">🐱</div>
+      <div>
+        <div class="name">슈링커</div>
+        <div class="count">채널</div>
+      </div>
+    </div>
+
+    <div class="chat-body" id="chatBody">
+
+      <!-- 봇 웰컴 -->
+      <div class="bot-row">
+        <div class="bot-avatar">🐱</div>
+        <div class="bubble">안녕하세요! 🐱
+슈레인 고양이 사료 공식 채널입니다.
+
+아래 메뉴에서 원하시는 항목을 선택해 주세요 😊</div>
+      </div>
+      <div class="quick-replies">
+        <button class="qr-btn" onclick="showProducts()">🛍 상품 목록</button>
+        <button class="qr-btn" onclick="showPurchase()">🛒 구매하기</button>
+        <button class="qr-btn" onclick="showFAQ()">❓ 자주 묻는 질문</button>
+      </div>
+
+    </div>
+
+    <!-- 하단 탭 메뉴 -->
+    <div class="tab-menu">
+      <button class="tab-item" onclick="showProducts()">🛍<br>상품 목록</button>
+      <button class="tab-item" onclick="showPurchase()">🛒<br>구매하기</button>
+      <button class="tab-item" onclick="showFAQ()">❓<br>자주 묻는<br>질문</button>
+      <button class="tab-item" onclick="goHome()">🏠<br>홈</button>
+      <button class="tab-item" onclick="window.open('https://xn--om2b15qn1d.com/')">🌐<br>홈페이지</button>
+      <button class="tab-item">💬<br>1:1 문의</button>
+    </div>
+  </div>
+
+  <!-- 엔드포인트 목록 -->
+  <div class="endpoints">
+    <h2>📡 스킬 서버 엔드포인트</h2>
+    <div class="endpoint-item">
+      <span class="method">POST</span>
+      <span class="ep-path">/skill</span>
+      <span class="ep-desc">통합 라우트</span>
+    </div>
+    <div class="endpoint-item">
+      <span class="method">POST</span>
+      <span class="ep-path">/welcome</span>
+      <span class="ep-desc">웰컴 블록</span>
+    </div>
+    <div class="endpoint-item">
+      <span class="method">POST</span>
+      <span class="ep-path">/products</span>
+      <span class="ep-desc">상품 목록</span>
+    </div>
+    <div class="endpoint-item">
+      <span class="method">POST</span>
+      <span class="ep-path">/purchase</span>
+      <span class="ep-desc">구매 안내</span>
+    </div>
+    <div class="endpoint-item">
+      <span class="method">POST</span>
+      <span class="ep-path">/purchase/confirm</span>
+      <span class="ep-desc">구매 접수 확인</span>
+    </div>
+    <div class="endpoint-item">
+      <span class="method">POST</span>
+      <span class="ep-path">/faq</span>
+      <span class="ep-desc">자주 묻는 질문</span>
+    </div>
+  </div>
+
+<script>
+  const body = document.getElementById('chatBody');
+
+  function addUserMsg(text) {
+    const row = document.createElement('div');
+    row.className = 'user-row';
+    row.innerHTML = `<div class="user-bubble">${text}</div>`;
+    body.appendChild(row);
+  }
+
+  function addBotBubble(text) {
+    const row = document.createElement('div');
+    row.className = 'bot-row';
+    row.innerHTML = `<div class="bot-avatar">🐱</div><div class="bubble">${text}</div>`;
+    body.appendChild(row);
+  }
+
+  function addQuickReplies(items) {
+    const wrap = document.createElement('div');
+    wrap.className = 'quick-replies';
+    items.forEach(item => {
+      const btn = document.createElement('button');
+      btn.className = 'qr-btn';
+      btn.textContent = item.label;
+      btn.onclick = () => item.action();
+      wrap.appendChild(btn);
+    });
+    body.appendChild(wrap);
+  }
+
+  function scrollBottom() {
+    setTimeout(() => body.scrollTop = body.scrollHeight, 100);
+  }
+
+  function showProducts() {
+    addUserMsg('🛍 상품 목록');
+    const wrap = document.createElement('div');
+    wrap.className = 'carousel-wrap';
+    const products = [
+      {
+        name: '슈레인 인도어 소고기+체중관리 2.5kg',
+        price: '27,000원',
+        img: 'https://ecimg.cafe24img.com/pg2547b04207977059/cndjrms30/web/product/big/20260129/fde42501677263b549c05d016fd3c5ac.jpg',
+        url: 'https://xn--om2b15qn1d.com/product/detail.html?product_no=37&cate_no=1&display_group=2'
+      },
+      {
+        name: '슈레인 입맛 까다로운 단백질 40%',
+        price: '20,000원',
+        img: 'https://ecimg.cafe24img.com/pg2547b04207977059/cndjrms30/web/product/big/20260129/4f39030fd759620da2b84d8227b7914b.jpg',
+        url: 'https://xn--om2b15qn1d.com/product/detail.html?product_no=38&cate_no=1&display_group=2'
+      }
+    ];
+    products.forEach(p => {
+      const card = document.createElement('div');
+      card.className = 'product-card';
+      card.innerHTML = `
+        <img src="${p.img}" alt="${p.name}" onerror="this.src='https://via.placeholder.com/220x160?text=상품이미지'">
+        <div class="card-body">
+          <div class="card-name">${p.name}</div>
+          <div class="card-price">${p.price}</div>
+        </div>
+        <div class="card-buttons">
+          <button class="card-btn" onclick="window.open('${p.url}')">상세보기</button>
+          <button class="card-btn" onclick="showPurchase('${p.name}')">구매하기</button>
+        </div>`;
+      wrap.appendChild(card);
+    });
+    body.appendChild(wrap);
+    addQuickReplies([
+      { label: '📦 구매 방법 안내', action: showPurchase },
+      { label: '❓ 자주 묻는 질문', action: showFAQ }
+    ]);
+    scrollBottom();
+  }
+
+  function showPurchase(productName) {
+    const isP37 = !productName || productName.includes('인도어');
+    const name = isP37 ? '인도어 소고기+체중관리 2.5kg' : '입맛 까다로운 단백질 40%';
+    const img = isP37
+      ? 'https://ecimg.cafe24img.com/pg2547b04207977059/cndjrms30/web/product/big/20260129/fde42501677263b549c05d016fd3c5ac.jpg'
+      : 'https://ecimg.cafe24img.com/pg2547b04207977059/cndjrms30/web/product/big/20260129/4f39030fd759620da2b84d8227b7914b.jpg';
+
+    addUserMsg('🛒 구매하기');
+
+    const card = document.createElement('div');
+    card.className = 'form-card';
+    card.innerHTML = `
+      <img src="${img}" alt="${name}">
+      <div class="form-body">
+        <div class="form-title">🛒 구매 신청 - ${name}</div>
+        <div class="form-text">아래 양식을 복사해서 전송해 주세요 😊\n\n─────────────────\n📋 구매 신청서\n\n구매 품목 : ${name}\n구매 수량 : \n주소지 : \n연락처 : \n성함 : \n배송 메모 : \n─────────────────</div>
+      </div>
+      <button class="form-btn">상품 페이지 보기</button>`;
+    body.appendChild(card);
+
+    addQuickReplies([
+      { label: '🐱 다른 상품 보기', action: showProducts },
+      { label: '❓ 자주 묻는 질문', action: showFAQ }
+    ]);
+    scrollBottom();
+  }
+
+  function showFAQ() {
+    addUserMsg('❓ 자주 묻는 질문');
+    addBotBubble(`❓ 자주 묻는 질문\n\n📦 배송은 얼마나 걸리나요?\n→ 1-2 영업일 내 출고, 도착 2-3일\n\n💰 배송비는?\n→ 3만원 이상 무료배송\n\n🐱 어떤 고양이에게 맞나요?\n→ 인도어용: 실내묘 체중관리\n→ 단백질 40%: 까다로운 식욕\n\n🔄 교환/환불?\n→ 수령 후 7일 이내 미개봉 가능`);
+    addQuickReplies([
+      { label: '🛍 상품 목록 보기', action: showProducts },
+      { label: '🛒 구매하기', action: showPurchase }
+    ]);
+    scrollBottom();
+  }
+
+  function goHome() {
+    body.innerHTML = '';
+    const row = document.createElement('div');
+    row.className = 'bot-row';
+    row.innerHTML = `<div class="bot-avatar">🐱</div><div class="bubble">안녕하세요! 🐱\n슈레인 고양이 사료 공식 채널입니다.\n\n아래 메뉴에서 원하시는 항목을 선택해 주세요 😊</div>`;
+    body.appendChild(row);
+    addQuickReplies([
+      { label: '🛍 상품 목록', action: showProducts },
+      { label: '🛒 구매하기', action: showPurchase },
+      { label: '❓ 자주 묻는 질문', action: showFAQ }
+    ]);
+  }
+</script>
+</body>
+</html>

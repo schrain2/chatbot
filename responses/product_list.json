@@ -1,0 +1,81 @@
+{
+  "version": "2.0",
+  "template": {
+    "outputs": [
+      {
+        "simpleText": {
+          "text": "🐱 슈레인 고양이 사료\n아래 상품 중 선택해 주세요!"
+        }
+      },
+      {
+        "carousel": {
+          "type": "commerceCard",
+          "items": [
+            {
+              "description": "슈레인 인도어 소고기+체중관리 2.5kg",
+              "price": 27000,
+              "currency": "won",
+              "discount": 0,
+              "thumbnails": [
+                {
+                  "imageUrl": "https://ecimg.cafe24img.com/pg2547b04207977059/cndjrms30/web/product/big/20260129/fde42501677263b549c05d016fd3c5ac.jpg",
+                  "link": {
+                    "web": "https://xn--om2b15qn1d.com/product/detail.html?product_no=37&cate_no=1&display_group=2"
+                  }
+                }
+              ],
+              "profile": {
+                "nickname": "슈레인"
+              },
+              "buttons": [
+                {
+                  "label": "상세보기",
+                  "action": "webLink",
+                  "webLinkUrl": "https://xn--om2b15qn1d.com/product/detail.html?product_no=37&cate_no=1&display_group=2"
+                },
+                {
+                  "label": "구매하기",
+                  "action": "message",
+                  "messageText": "인도어 소고기+체중관리 구매하기"
+                }
+              ]
+            },
+            {
+              "description": "슈레인 입맛 까다로운 단백질 40%",
+              "price": 20000,
+              "currency": "won",
+              "discount": 0,
+              "thumbnails": [
+                {
+                  "imageUrl": "https://ecimg.cafe24img.com/pg2547b04207977059/cndjrms30/web/product/big/20260129/4f39030fd759620da2b84d8227b7914b.jpg",
+                  "link": {
+                    "web": "https://xn--om2b15qn1d.com/product/detail.html?product_no=38&cate_no=1&display_group=2"
+                  }
+                }
+              ],
+              "profile": {
+                "nickname": "슈레인"
+              },
+              "buttons": [
+                {
+                  "label": "상세보기",
+                  "action": "webLink",
+                  "webLinkUrl": "https://xn--om2b15qn1d.com/product/detail.html?product_no=38&cate_no=1&display_group=2"
+                },
+                {
+                  "label": "구매하기",
+                  "action": "message",
+                  "messageText": "입맛 까다로운 단백질 40% 구매하기"
+                }
+              ]
+            }
+          ]
+        }
+      }
+    ],
+    "quickReplies": [
+      { "label": "📦 구매 방법 안내", "action": "message", "messageText": "구매하기" },
+      { "label": "❓ 자주 묻는 질문", "action": "message", "messageText": "자주 묻는 질문" }
+    ]
+  }
+}
