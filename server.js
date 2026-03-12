@@ -59,7 +59,7 @@ function buildMain() {
             title: '안녕하세요! 🐱 SCHRAIN 슈레인입니다',
             description: '슈레인 고양이 사료 공식 카카오 채널입니다.\n\n우리 아이가 먹는다는 마음으로\n정성껏 안전한 식품으로만 만들었습니다 💛\n\n아래 메뉴에서 원하시는 항목을 선택해 주세요!',
             thumbnail: {
-              imageUrl: PRODUCTS[37].imageUrl
+              imageUrl: (process.env.RENDER_EXTERNAL_URL || 'http://localhost:3000') + '/welcome.png'
             },
             buttons: [
               {
@@ -462,7 +462,11 @@ app.post('/welcome', (req, res) => res.json(buildMain()));
 // 메인 메뉴 (별도 스킬로 등록 가능)
 app.post('/main', (req, res) => res.json(buildMain()));
 
-app.post('/fallback', (req, res) => res.json(buildFallback()));
+app.post('/fallback', (req, res) => {
+  const utterance = req.body?.userRequest?.utterance || '';
+  const result = route(utterance);
+  res.json(result || buildFallback());
+});
 
 app.post('/products', (req, res) => res.json(buildProductList()));
 
