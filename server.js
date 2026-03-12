@@ -157,8 +157,11 @@ function buildProductDetail(productId) {
 }
 
 // 구매하기 → 상품 페이지로 안내 (신청서 없음)
+// utterance가 없거나 상품 특정 불가 시 상품 목록 반환
 function buildPurchasePage(utterance) {
   const is37 = /인도어|소고기|체중/.test(utterance);
+  const is38 = /까다로운|단백질|청어/.test(utterance);
+  if (!is37 && !is38) return buildProductList();
   const p = is37 ? PRODUCTS[37] : PRODUCTS[38];
   const other = is37 ? PRODUCTS[38] : PRODUCTS[37];
 
@@ -438,15 +441,15 @@ function route(utterance) {
   if (/인도어|소고기|체중관리/.test(u)) return buildProductDetail(37);
   if (/까다로운|단백질\s*40|청어/.test(u)) return buildProductDetail(38);
 
-  // 카테고리
-  if (/상품|사료|목록|리스트|제품|뭐 파|종류|추천|어떤 거/.test(u)) return buildProductList();
-  if (/구매|주문|사고싶|살게|구입|결제|장바구니|얼마예요|얼마임/.test(u)) return buildProductList();
+  // 카테고리 — 구체적인 intent를 먼저, 범용 구매 intent는 마지막
   if (/배송|택배|도착|운송장|어디쯤|교환|환불|반품|배송비/.test(u)) return buildShipping();
   if (/브랜드|회사|소개|슈레인|schrain|어떤 곳/i.test(u)) return buildBrand();
-  if (/성분|원료|재료|그레인|lid|단백질|영양/i.test(u)) return buildIngredients();
+  if (/성분|원료|재료|그레인|lid|영양/i.test(u)) return buildIngredients();
   if (/급여|먹이|어떻게 먹|얼마나 줘|종이컵|하루|기호성|밥/.test(u)) return buildFeeding();
   if (/faq|자주|질문|궁금|모르겠/i.test(u)) return buildFAQ();
   if (/문의|연락|전화|이메일|카톡|연락처/.test(u)) return buildContact();
+  if (/상품|사료|목록|리스트|제품|뭐 파|종류|추천|어떤 거/.test(u)) return buildProductList();
+  if (/구매|주문|사고싶|살게|구입|결제|장바구니|얼마/.test(u)) return buildProductList();
 
   return null;
 }
