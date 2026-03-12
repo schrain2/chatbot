@@ -506,9 +506,27 @@ app.post('/skill', (req, res) => {
   res.json(result || buildFallback());
 });
 
+// ─── 헬스체크 ─────────────────────────────────────────────────────────────────
+app.get('/ping', (req, res) => res.send('pong'));
+
 // ─── 서버 시작 ────────────────────────────────────────────────────────────────
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`SCHRAIN 카카오 챗봇 스킬 서버 → http://localhost:${PORT}`);
   console.log('엔드포인트: /welcome /fallback /skill /products /purchase /shipping /brand /faq /contact /ingredients /feeding');
+
+  // ─── Render 슬립 방지 (9분마다 self-ping) ──────────────────────────────────
+  const RENDER_URL = process.env.RENDER_EXTERNAL_URL || 'https://schrain-chatbot.onrender.com';
+  const https = require('https');
+  const http = require('http');
+
+  setInterval(() => {
+    const url = new URL(`${RENDER_URL}/ping`);
+    const client = url.protocol === 'https:' ? https : http;
+    client.get(url.toString(), (res) => {
+      console.log(`[keep-alive] ping → ${res.statusCode}`);
+    }).on('error', (err) => {
+      console.warn(`[keep-alive] ping 실패: ${err.message}`);
+    });
+  }, 9 * 60 * 1000); // 9분
 });
