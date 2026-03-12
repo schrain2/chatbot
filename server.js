@@ -48,14 +48,15 @@ const MAIN_QR = [
 
 // ─── 응답 빌더 ────────────────────────────────────────────────────────────────
 
-function buildWelcome() {
+// 메인 (시작/welcome 공용)
+function buildMain() {
   return {
     version: '2.0',
     template: {
       outputs: [
         {
           basicCard: {
-            title: '안녕하세요! 🐱 SCHRAIN입니다',
+            title: '안녕하세요! 🐱 SCHRAIN 슈레인입니다',
             description: '슈레인 고양이 사료 공식 카카오 채널입니다.\n\n우리 아이가 먹는다는 마음으로\n정성껏 안전한 식품으로만 만들었습니다 💛\n\n아래 메뉴에서 원하시는 항목을 선택해 주세요!',
             thumbnail: {
               imageUrl: PRODUCTS[37].imageUrl
@@ -141,8 +142,7 @@ function buildProductDetail(productId) {
             description: `💰 가격: ${p.price.toLocaleString()}원\n🍖 단백질: ${p.protein}\n🐾 대상: ${p.target}\n🌾 그레인프리 · LID 설계\n\n✨ 특징\n${p.feature}\n\n🥩 원료\n${p.ingredients}\n\n📏 키블 크기: ${p.kibble}`,
             thumbnail: { imageUrl: p.imageUrl, fixedRatio: true },
             buttons: [
-              { label: '상품 페이지 보기', action: 'webLink', webLinkUrl: p.pageUrl },
-              { label: '구매 신청하기', action: 'message', messageText: `${p.shortName} 구매하기` }
+              { label: '🛍 상품 페이지 보기', action: 'webLink', webLinkUrl: p.pageUrl }
             ]
           }
         }
@@ -156,8 +156,9 @@ function buildProductDetail(productId) {
   };
 }
 
-function buildPurchaseForm(utterance) {
-  const is37 = utterance.includes('인도어') || utterance.includes('소고기') || utterance.includes('체중');
+// 구매하기 → 상품 페이지로 안내 (신청서 없음)
+function buildPurchasePage(utterance) {
+  const is37 = /인도어|소고기|체중/.test(utterance);
   const p = is37 ? PRODUCTS[37] : PRODUCTS[38];
   const other = is37 ? PRODUCTS[38] : PRODUCTS[37];
 
@@ -167,11 +168,11 @@ function buildPurchaseForm(utterance) {
       outputs: [
         {
           basicCard: {
-            title: `🛒 구매 신청 - ${p.shortName}`,
-            description: `💰 ${p.price.toLocaleString()}원 · 무료배송\n\n아래 양식을 복사해서\n내용을 채워 전송해 주세요 😊\n\n─────────────────\n📋 구매 신청서\n\n구매 품목 : ${p.shortName}\n구매 수량 : (예: 1개)\n주소지 : \n연락처 : \n성함 : \n배송 메모 : \n─────────────────\n\n✅ 전송 후 담당자 확인 및\n결제 안내 드리겠습니다!`,
+            title: `🛒 ${p.shortName}`,
+            description: `💰 ${p.price.toLocaleString()}원 · 무료배송\n\n공식 홈페이지에서 바로 구매하실 수 있습니다 😊\n상품 페이지 버튼을 눌러 주문해 주세요!`,
             thumbnail: { imageUrl: p.imageUrl, fixedRatio: true },
             buttons: [
-              { label: '상품 페이지 보기', action: 'webLink', webLinkUrl: p.pageUrl }
+              { label: '🛍 상품 페이지 보기', action: 'webLink', webLinkUrl: p.pageUrl }
             ]
           }
         }
@@ -181,22 +182,6 @@ function buildPurchaseForm(utterance) {
         { label: '📦 배송 안내', action: 'message', messageText: '배송 안내' },
         { label: '🛍 상품 목록', action: 'message', messageText: '상품 목록' }
       ]
-    }
-  };
-}
-
-function buildPurchaseConfirm(utterance) {
-  return {
-    version: '2.0',
-    template: {
-      outputs: [
-        {
-          simpleText: {
-            text: `✅ 구매 신청이 접수되었습니다!\n\n${utterance}\n\n─────────────────\n담당자 확인 후 결제 안내 드리겠습니다.\n영업일 기준 1~2시간 내 연락드립니다 😊\n\n📞 010-3223-1606\n📧 cndjrms29@naver.com`
-          }
-        }
-      ],
-      quickReplies: MAIN_QR
     }
   };
 }
@@ -372,6 +357,7 @@ function buildFAQ() {
           listCard: {
             header: { title: '❓ 자주 묻는 질문' },
             items: [
+              // listCard 최대 5개 제한 (카카오 스펙)
               {
                 title: '배송비가 있나요?',
                 description: '전 상품 무료배송입니다 🎉'
@@ -385,12 +371,8 @@ function buildFAQ() {
                 description: '인도어: 실내묘 체중관리\n단백질 40%: 식욕 까다로운 고양이'
               },
               {
-                title: '교환/환불은 어떻게 하나요?',
-                description: '수령 후 7일 이내 미개봉 상품\n반송비는 고객 부담'
-              },
-              {
-                title: '결제는 어떻게 하나요?',
-                description: '구매 신청서 전송 후\n담당자가 결제 링크 안내드립니다'
+                title: '구매는 어떻게 하나요?',
+                description: '공식 홈페이지에서 직접 구매 가능합니다\n상품 페이지에서 장바구니 후 결제해 주세요!'
               },
               {
                 title: '새끼 고양이도 먹을 수 있나요?',
@@ -443,27 +425,27 @@ function buildContact() {
 function route(utterance) {
   const u = utterance.trim();
 
-  // 구매 신청서 접수 (양식 입력한 경우)
-  if (/구매 품목/.test(u)) return buildPurchaseConfirm(u);
+  // 시작/메인/홈
+  if (/시작|메인|처음으로|홈으로|home|main|start/i.test(u) || /^(처음|홈)$/.test(u)) return buildMain();
 
-  // 특정 상품 구매
+  // 특정 상품 구매 (구매 의도 + 상품명)
   if (/인도어.*구매|구매.*인도어|소고기.*구매|구매.*소고기|체중.*구매|구매.*체중/.test(u))
-    return buildPurchaseForm('인도어');
+    return buildPurchasePage('인도어');
   if (/까다로운.*구매|구매.*까다로운|단백질.*구매|구매.*단백질|청어.*구매|구매.*청어/.test(u))
-    return buildPurchaseForm('까다로운');
+    return buildPurchasePage('까다로운');
 
   // 상품 상세
   if (/인도어|소고기|체중관리/.test(u)) return buildProductDetail(37);
-  if (/까다로운|단백질 40|청어/.test(u)) return buildProductDetail(38);
+  if (/까다로운|단백질\s*40|청어/.test(u)) return buildProductDetail(38);
 
   // 카테고리
-  if (/상품|사료|목록|리스트|제품|뭐 파/.test(u)) return buildProductList();
-  if (/구매|주문|사고싶|살게|구입/.test(u)) return buildPurchaseForm('까다로운');
-  if (/배송|택배|언제|얼마나|도착|운송|교환|환불|반품/.test(u)) return buildShipping();
-  if (/브랜드|회사|소개|슈레인|schrain|어떤 곳/.test(u)) return buildBrand();
-  if (/성분|원료|재료|그레인|단백질|lid/.test(u)) return buildIngredients();
-  if (/급여|먹이|어떻게 먹|얼마나 먹|밥/.test(u)) return buildFeeding();
-  if (/faq|자주|질문|궁금|모르겠|어떻게/.test(u)) return buildFAQ();
+  if (/상품|사료|목록|리스트|제품|뭐 파|종류|추천|어떤 거/.test(u)) return buildProductList();
+  if (/구매|주문|사고싶|살게|구입|결제|장바구니|얼마예요|얼마임/.test(u)) return buildProductList();
+  if (/배송|택배|도착|운송장|어디쯤|교환|환불|반품|배송비/.test(u)) return buildShipping();
+  if (/브랜드|회사|소개|슈레인|schrain|어떤 곳/i.test(u)) return buildBrand();
+  if (/성분|원료|재료|그레인|lid|단백질|영양/i.test(u)) return buildIngredients();
+  if (/급여|먹이|어떻게 먹|얼마나 줘|종이컵|하루|기호성|밥/.test(u)) return buildFeeding();
+  if (/faq|자주|질문|궁금|모르겠/i.test(u)) return buildFAQ();
   if (/문의|연락|전화|이메일|카톡|연락처/.test(u)) return buildContact();
 
   return null;
@@ -471,7 +453,11 @@ function route(utterance) {
 
 // ─── 엔드포인트 ───────────────────────────────────────────────────────────────
 
-app.post('/welcome', (req, res) => res.json(buildWelcome()));
+// 시작 (카카오 채널 진입 시 자동 호출)
+app.post('/welcome', (req, res) => res.json(buildMain()));
+
+// 메인 메뉴 (별도 스킬로 등록 가능)
+app.post('/main', (req, res) => res.json(buildMain()));
 
 app.post('/fallback', (req, res) => res.json(buildFallback()));
 
@@ -491,12 +477,7 @@ app.post('/feeding', (req, res) => res.json(buildFeeding()));
 
 app.post('/purchase', (req, res) => {
   const utterance = req.body?.userRequest?.utterance || '';
-  res.json(buildPurchaseForm(utterance));
-});
-
-app.post('/purchase/confirm', (req, res) => {
-  const utterance = req.body?.userRequest?.utterance || '';
-  res.json(buildPurchaseConfirm(utterance));
+  res.json(buildPurchasePage(utterance));
 });
 
 // 통합 스킬 (utterance 자동 분기)
@@ -513,7 +494,7 @@ app.get('/ping', (req, res) => res.send('pong'));
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`SCHRAIN 카카오 챗봇 스킬 서버 → http://localhost:${PORT}`);
-  console.log('엔드포인트: /welcome /fallback /skill /products /purchase /shipping /brand /faq /contact /ingredients /feeding');
+  console.log('엔드포인트: /welcome /main /fallback /skill /products /purchase /shipping /brand /faq /contact /ingredients /feeding');
 
   // ─── Render 슬립 방지 (9분마다 self-ping) ──────────────────────────────────
   const RENDER_URL = process.env.RENDER_EXTERNAL_URL || 'https://schrain-chatbot.onrender.com';
