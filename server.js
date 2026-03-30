@@ -11,6 +11,7 @@ const PRODUCTS = {
   37: {
     name: '슈레인 인도어 소고기+체중관리 2.5kg',
     shortName: '인도어 소고기+체중관리',
+    description: '청어제품[2.5kg] (까다로운입맛냥이♥)',
     price: 27000,
     protein: '40% 이상',
     flavor: '소고기',
@@ -24,6 +25,7 @@ const PRODUCTS = {
   38: {
     name: '슈레인 입맛 까다로운 단백질 40%',
     shortName: '입맛 까다로운 단백질 40%',
+    description: '소고기제품[2.5kg] (체중관리냥이♥)',
     price: 20000,
     protein: '40%',
     flavor: '청어 & 감자',
@@ -105,8 +107,8 @@ function buildProductList() {
         {
           carousel: {
             type: 'commerceCard',
-            items: Object.entries(PRODUCTS).map(([id, p]) => ({
-              description: p.name,
+            items: [38, 37].map(id => ({ id, p: PRODUCTS[id] })).map(({ p }) => ({
+              description: p.description,
               price: p.price,
               currency: 'won',
               discount: 0,
